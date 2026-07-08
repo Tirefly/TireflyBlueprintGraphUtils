@@ -7,6 +7,7 @@
 #include "K2Node_CallFunction.h"
 #include "SGraphPinNameList.h"
 #include "FunctionParamOptions/SGraphPinStringList.h"
+#include "UObject/FindObjectFlags.h"
 
 
 TSharedPtr<SGraphPin> FTireflyParamOptionPinFactory::CreatePin(UEdGraphPin* InPin) const
@@ -35,10 +36,10 @@ TSharedPtr<SGraphPin> FTireflyParamOptionPinFactory::CreatePin(UEdGraphPin* InPi
 	UObject* OwningObject = nullptr;
 	UFunction* FuncToExec = nullptr;
 	
-    // 处理具有命名空间的函数名
+	// 处理具有命名空间的函数名
 	if (PinOptionFunctionName.Contains(TEXT(".")))
 	{
-		FuncToExec = FindObject<UFunction>(nullptr, *PinOptionFunctionName, true);
+		FuncToExec = FindObject<UFunction>(nullptr, *PinOptionFunctionName, EFindObjectFlags::ExactClass);
 		OwningObject = FuncToExec ? FuncToExec->GetOuter() : nullptr;
 	}
 	else

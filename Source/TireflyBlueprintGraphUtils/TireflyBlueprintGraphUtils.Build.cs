@@ -36,6 +36,8 @@ public class TireflyBlueprintGraphUtils : ModuleRules
 		PrivateDependencyModuleNames.Add("UnrealEd");
 		PrivateDependencyModuleNames.Add("GraphEditor");
 		PrivateDependencyModuleNames.Add("InputCore");
+		PrivateDependencyModuleNames.Add("Kismet");
+		PrivateDependencyModuleNames.Add("PropertyEditor");
 		
 		
 		DynamicallyLoadedModuleNames.AddRange(
