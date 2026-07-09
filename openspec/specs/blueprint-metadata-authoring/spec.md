@@ -1,7 +1,7 @@
 # blueprint-metadata-authoring Specification
 
 ## Purpose
-TBD - created by archiving change add-blueprint-metadata-details-editor. Update Purpose after archive.
+定义 TireflyBlueprintGraphUtils 插件中蓝图变量和函数 MetaData 的编辑能力规范，包括公共 Key/Value 编辑控件、Details 面板扩展、事务与脏标记、常用 Key 建议等。函数参数 MetaData 由 `blueprint-function-param-metadata` capability 单独覆盖。
 ## Requirements
 ### Requirement: 通用 MetaData Key/Value 编辑控件
 TireflyBlueprintGraphUtils SHALL provide a reusable editor UI for editing MetaData as key/value rows, where the key represents a MetaData name and the value represents the MetaData string value.
@@ -79,16 +79,16 @@ TireflyBlueprintGraphUtils SHALL add a MetaData editing section to Blueprint fun
 - **AND** it MUST NOT depend on Kismet private detail customization classes
 
 ### Requirement: 第一阶段不得实现参数和结构体 MetaData 编辑
-The stage-one Blueprint MetaData editor SHALL be limited to the shared Key/Value UI, Blueprint variable MetaData, and Blueprint function MetaData.
+The Blueprint MetaData editor SHALL be limited to the shared Key/Value UI, Blueprint variable MetaData, and Blueprint function MetaData. Function parameter MetaData is now covered by the `blueprint-function-param-metadata` capability. UserDefinedStruct MetaData remains unsupported and must be a separate future proposal.
 
 #### Scenario: 用户期望编辑函数参数 MetaData
 - **WHEN** 用户需要编辑 Blueprint function parameter MetaData such as `UPARAM`-style metadata
-- **THEN** this stage-one feature MUST NOT claim support for that workflow
-- **AND** parameter MetaData support MUST remain a separate future proposal
+- **THEN** this capability MUST defer to the `blueprint-function-param-metadata` capability for that workflow
+- **AND** the `blueprint-function-param-metadata` capability MUST be active before parameter MetaData editing is available
 
 #### Scenario: 用户期望编辑 UserDefinedStruct MetaData
 - **WHEN** 用户需要编辑 UserDefinedStruct or struct member MetaData
-- **THEN** this stage-one feature MUST NOT claim support for that workflow
+- **THEN** this feature MUST NOT claim support for that workflow
 - **AND** struct MetaData support MUST remain a separate future proposal
 
 ### Requirement: MetaData Key 建议不得限制手动输入

@@ -37,6 +37,7 @@ public class TireflyBlueprintGraphUtils : ModuleRules
 		PrivateDependencyModuleNames.Add("GraphEditor");
 		PrivateDependencyModuleNames.Add("InputCore");
 		PrivateDependencyModuleNames.Add("Kismet");
+		PrivateDependencyModuleNames.Add("KismetCompiler");
 		PrivateDependencyModuleNames.Add("PropertyEditor");
 		
 		

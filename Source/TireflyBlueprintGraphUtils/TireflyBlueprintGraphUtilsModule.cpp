@@ -2,15 +2,19 @@
 
 #include "TireflyBlueprintGraphUtilsModule.h"
 
+#include "BlueprintCompilationManager.h"
 #include "BlueprintEditorModule.h"
 #include "EdGraphUtilities.h"
 #include "Editor.h"
 #include "FunctionParamOptions/TireflyParamOptionPinFactory.h"
+#include "K2Node_CustomEvent.h"
 #include "K2Node_FunctionEntry.h"
 #include "MetaDataEditor/TireflyBlueprintFunctionMetaDataDetails.h"
 #include "MetaDataEditor/TireflyBlueprintVariableMetaDataDetails.h"
 #include "Misc/CoreDelegates.h"
 #include "Modules/ModuleManager.h"
+#include "ParamMetaData/TireflyParamMetaDataCompilerExtension.h"
+#include "StructMetaData/TireflyStructMetaDataEditorManager.h"
 #include "UObject/UnrealType.h"
 
 
@@ -20,6 +24,8 @@ void FTireflyBlueprintGraphUtilsModule::StartupModule()
 {
 	TireflyNameOptionPinFactory = MakeShareable(new FTireflyParamOptionPinFactory());
 	FEdGraphUtilities::RegisterVisualPinFactory(TireflyNameOptionPinFactory);
+
+	RegisterParamMetaDataCompilerExtension();
 
 	if (GEditor)
 	{
@@ -40,6 +46,7 @@ void FTireflyBlueprintGraphUtilsModule::ShutdownModule()
 	}
 
 	UnregisterBlueprintDetailsCustomizations();
+	UnregisterParamMetaDataCompilerExtension();
 
 	if (TireflyNameOptionPinFactory.IsValid())
 	{
@@ -58,6 +65,14 @@ void FTireflyBlueprintGraphUtilsModule::RegisterBlueprintDetailsCustomizations()
 	BlueprintFunctionCustomizationHandle = BlueprintEditorModule.RegisterFunctionCustomization(
 		UK2Node_FunctionEntry::StaticClass(),
 		FOnGetFunctionCustomizationInstance::CreateStatic(&FTireflyBlueprintFunctionMetaDataDetails::MakeInstance));
+
+	CustomEventCustomizationHandle = BlueprintEditorModule.RegisterFunctionCustomization(
+		UK2Node_CustomEvent::StaticClass(),
+		FOnGetFunctionCustomizationInstance::CreateStatic(&FTireflyBlueprintFunctionMetaDataDetails::MakeInstance));
+
+	// 注册结构体 MetaData 编辑器工具栏扩展
+	StructMetaDataEditorManager = MakeUnique<FTireflyStructMetaDataEditorManager>();
+	StructMetaDataEditorManager->Register();
 }
 
 void FTireflyBlueprintGraphUtilsModule::UnregisterBlueprintDetailsCustomizations()
@@ -79,6 +94,34 @@ void FTireflyBlueprintGraphUtilsModule::UnregisterBlueprintDetailsCustomizations
 		BlueprintEditorModule.UnregisterFunctionCustomization(UK2Node_FunctionEntry::StaticClass(), BlueprintFunctionCustomizationHandle);
 		BlueprintFunctionCustomizationHandle.Reset();
 	}
+
+	if (CustomEventCustomizationHandle.IsValid())
+	{
+		BlueprintEditorModule.UnregisterFunctionCustomization(UK2Node_CustomEvent::StaticClass(), CustomEventCustomizationHandle);
+		CustomEventCustomizationHandle.Reset();
+	}
+
+	if (StructMetaDataEditorManager.IsValid())
+	{
+		StructMetaDataEditorManager->Unregister();
+		StructMetaDataEditorManager.Reset();
+	}
+}
+
+void FTireflyBlueprintGraphUtilsModule::RegisterParamMetaDataCompilerExtension()
+{
+	ParamMetaDataCompilerExtension = TStrongObjectPtr<UTireflyParamMetaDataCompilerExtension>(
+		NewObject<UTireflyParamMetaDataCompilerExtension>());
+	FBlueprintCompilationManager::RegisterCompilerExtension(
+		UBlueprint::StaticClass(), ParamMetaDataCompilerExtension.Get());
+}
+
+void FTireflyBlueprintGraphUtilsModule::UnregisterParamMetaDataCompilerExtension()
+{
+	// FBlueprintCompilationManager 没有公开反注册接口，
+	// 但编辑器插件模块在编辑器生命周期内不会被卸载，extension 实例会随模块存活。
+	// 释放 TStrongObjectPtr 让 UObject 进入 GC 流程。
+	ParamMetaDataCompilerExtension.Reset();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -233,6 +233,7 @@ void STireflyMetaDataEditor::OnKeyCommitted(const FText& NewText, ETextCommit::T
 	if (OldKey != NewKey && OnRenameMetaData.IsBound())
 	{
 		OnRenameMetaData.Execute(OldKey, NewKey);
+		RowItem->Key = NewKey;
 		RefreshRows();
 	}
 }
